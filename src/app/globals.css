@@ -1,0 +1,157 @@
+@import "tailwindcss";
+
+/* Только светлая тема: вариант `dark:` не срабатывает никогда */
+@custom-variant dark (&:where(.never-dark, .never-dark *));
+
+@theme {
+  --font-sans: var(--font-nunito), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-nunito), "Segoe UI", system-ui, sans-serif;
+
+  /* Палитра «Алёнушки» */
+  --color-pink: #ffd9e5;
+  --color-sun: #ffe47a;
+  --color-mint: #bdeed8;
+  --color-lavender: #dccbff;
+  --color-sky: #c5eafb;
+  --color-coral: #ff846f;
+  --color-ink: #30334b;
+
+  /* Производные оттенки — для иконок, бордеров и контрастного текста */
+  --color-ink-soft: #5b5f7a;
+  --color-paper: #fffdf9;
+  --color-cream: #fff8ef;
+  --color-line: #f0e6dc;
+
+  --color-pink-soft: #fff1f5;
+  --color-pink-deep: #d9497a;
+  --color-sun-soft: #fff8d6;
+  --color-sun-deep: #8a6400;
+  --color-mint-soft: #ecfaf3;
+  --color-mint-deep: #1f7a55;
+  --color-lavender-soft: #f5f0ff;
+  --color-lavender-deep: #6a4cc7;
+  --color-sky-soft: #ecf8fe;
+  --color-sky-deep: #1f6c99;
+  --color-coral-soft: #ffe9e4;
+  --color-coral-deep: #c9412b;
+  --color-wa: #15803d;
+
+  --shadow-soft: 0 1px 2px rgb(48 51 75 / 0.05), 0 8px 24px -10px rgb(48 51 75 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(48 51 75 / 0.06), 0 18px 36px -14px rgb(48 51 75 / 0.24);
+
+  --animate-drift: drift 26s ease-in-out infinite alternate;
+  --animate-drift-slow: drift 38s ease-in-out infinite alternate-reverse;
+  --animate-bob: bob 6s ease-in-out infinite;
+  --animate-spin-slow: spin 60s linear infinite;
+}
+
+@keyframes drift {
+  from { transform: translateX(-10px); }
+  to { transform: translateX(14px); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+:root {
+  color-scheme: only light;
+  --header-h: 64px;
+  --gutter: 16px;
+}
+@media (min-width: 640px) {
+  :root { --gutter: 24px; }
+}
+@media (min-width: 1024px) {
+  :root { --header-h: 72px; --gutter: 32px; }
+}
+
+html {
+  color-scheme: only light;
+  background: var(--color-paper);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: clip;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  overflow-x: clip;
+  text-transform: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Якорные секции не прячутся под фиксированной шапкой */
+[data-section] {
+  /* часть верхнего отступа секции уходит под шапку — заголовок оказывается сразу под меню */
+  scroll-margin-top: calc(var(--header-h) - 20px);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+p { text-wrap: pretty; overflow-wrap: break-word; }
+
+/* Видимый фокус для клавиатуры */
+:focus-visible {
+  outline: 3px solid var(--color-lavender-deep);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+::selection { background: var(--color-sun); color: var(--color-ink); }
+
+.container-x {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section-y {
+  padding-block: clamp(44px, 6vw, 76px);
+}
+
+/* Появление при прокрутке — только если работает JS */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--d, 0ms);
+}
+html.js .reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Декор — не перехватывает клики и не мешает чтению */
+.decor {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html.js .reveal { opacity: 1; transform: none; }
+}
+
+/* Принудительно светлые элементы форм и полос прокрутки в любой системной теме */
+input, select, textarea, button { color-scheme: only light; font: inherit; }
