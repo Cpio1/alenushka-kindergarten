@@ -3,14 +3,14 @@
 import { Info } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Apple, Pear, Sparkle } from "../decor/Doodles";
-import { BreakfastArt, DinnerArt, LunchArt, SnackArt } from "../decor/Illustrations";
+import { BreakfastArt, LunchArt, SnackArt, VitaminArt } from "../decor/Illustrations";
 import { SectionHeading } from "../ui/SectionHeading";
 
 const MEALS = [
   { Art: BreakfastArt, card: "bg-sun-soft", art: "bg-sun", num: "text-sun-deep", tilt: "lg:-rotate-[1.2deg]" },
-  { Art: LunchArt, card: "bg-mint-soft", art: "bg-mint", num: "text-mint-deep", tilt: "lg:rotate-[0.8deg] lg:translate-y-3" },
-  { Art: SnackArt, card: "bg-pink-soft", art: "bg-pink", num: "text-pink-deep", tilt: "lg:-rotate-[0.6deg]" },
-  { Art: DinnerArt, card: "bg-lavender-soft", art: "bg-lavender", num: "text-lavender-deep", tilt: "lg:rotate-[1.2deg] lg:translate-y-3" },
+  { Art: VitaminArt, card: "bg-pink-soft", art: "bg-pink", num: "text-pink-deep", tilt: "lg:rotate-[0.8deg] lg:translate-y-3" },
+  { Art: LunchArt, card: "bg-mint-soft", art: "bg-mint", num: "text-mint-deep", tilt: "lg:-rotate-[0.6deg]" },
+  { Art: SnackArt, card: "bg-lavender-soft", art: "bg-lavender", num: "text-lavender-deep", tilt: "lg:rotate-[1.2deg] lg:translate-y-3" },
 ];
 
 export function Food() {

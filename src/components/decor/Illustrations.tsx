@@ -187,23 +187,34 @@ export function SnackArt({ className }: P) {
   );
 }
 
-export function DinnerArt({ className }: P) {
+export function VitaminArt({ className }: P) {
   return (
     <svg {...base} viewBox="0 0 120 90" className={className}>
       <ellipse cx="60" cy="84" rx="44" ry="4" fill={INK} opacity=".08" />
-      {/* вилка */}
-      <path d="M16 20v18a5 5 0 0 0 10 0V20M21 20v18M21 42v34" stroke="#9aa0c4" strokeWidth="3.5" strokeLinecap="round" fill="none" />
-      {/* тарелка */}
-      <circle cx="60" cy="50" r="30" fill="#fff" stroke="#b7a3f0" strokeWidth="3" />
-      <circle cx="60" cy="50" r="21" fill="#f5f0ff" />
-      <circle cx="54" cy="46" r="7" fill="#ffe47a" />
-      <circle cx="66" cy="54" r="6" fill="#bdeed8" />
-      <circle cx="64" cy="42" r="4" fill="#ff846f" />
-      {/* ложка */}
-      <ellipse cx="102" cy="28" rx="6" ry="9" fill="#9aa0c4" />
-      <path d="M102 36v40" stroke="#9aa0c4" strokeWidth="3.5" strokeLinecap="round" />
-      {/* месяц */}
-      <path d="M96 4a8 8 0 1 0 8 10 6 6 0 1 1-8-10Z" fill="#ffe47a" />
+      {/* банан */}
+      <path d="M22 44c4 18 22 28 42 24-16-4-30-14-36-28Z" fill="#ffe47a" stroke="#e0a800" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M28 40l-4-4" stroke="#7a5230" strokeWidth="3" strokeLinecap="round" />
+      {/* долька апельсина */}
+      <circle cx="80" cy="40" r="17" fill="#ffb347" />
+      <circle cx="80" cy="40" r="13" fill="#ffd27a" />
+      <path d="M80 27v26M67 40h26M71 31l18 18M89 31l-18 18" stroke="#fff6e0" strokeWidth="1.8" />
+      {/* тарелка с фруктами */}
+      <path d="M18 60h84a42 22 0 0 1-84 0Z" fill="#fff" stroke="#ff9cbc" strokeWidth="3" />
+      {/* клубника */}
+      <path d="M42 56c-8 0-10 8-6 14 2 3 4 5 6 5s4-2 6-5c4-6 2-14-6-14Z" fill="#ff846f" />
+      <path d="M36 56l6 3 6-3-6-4Z" fill="#5cc497" />
+      <circle cx="40" cy="63" r="1" fill="#fff6e0" />
+      <circle cx="44" cy="66" r="1" fill="#fff6e0" />
+      <circle cx="41" cy="69" r="1" fill="#fff6e0" />
+      {/* киви */}
+      <circle cx="70" cy="64" r="11" fill="#9b7a4f" />
+      <circle cx="70" cy="64" r="9" fill="#9be0c0" />
+      <circle cx="70" cy="64" r="3" fill="#f5fbe8" />
+      {[0, 60, 120, 180, 240, 300].map((a) => (
+        <circle key={a} cx="70" cy="58.5" r=".9" fill={INK} transform={`rotate(${a} 70 64)`} />
+      ))}
+      {/* искорка-витаминка */}
+      <path d="M104 10l2 5 5 2-5 2-2 5-2-5-5-2 5-2Z" fill="#ffc928" />
     </svg>
   );
 }
