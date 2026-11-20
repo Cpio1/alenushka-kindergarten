@@ -68,17 +68,25 @@ export function Hero() {
             {heroPhoto ? <HeroPhoto alt={h.photoAlt} mobile /> : <HeroSceneMobile />}
           </div>
 
-          <ul className="order-6 mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:order-4 lg:mt-7 lg:max-w-[600px] lg:gap-3">
+          <ul className="order-6 mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-[1fr_1fr_1fr_1.25fr] lg:order-4 lg:mt-7 lg:max-w-[600px] lg:gap-3">
             {h.facts.map((f, i) => (
               <li
                 key={f.label}
-                className="reveal flex min-w-0 flex-col rounded-2xl bg-white/90 px-3 py-2.5 shadow-soft ring-1 ring-line/70 sm:px-3.5 sm:py-3"
+                className={`reveal flex min-w-0 flex-col rounded-2xl bg-white/90 py-2.5 shadow-soft ring-1 ring-line/70 sm:py-3 ${f.value ? "px-3 sm:px-3.5" : "justify-center px-2 sm:px-1.5 xl:px-2"}`}
                 style={{ "--d": `${180 + i * 60}ms` } as React.CSSProperties}
               >
-                <span className={`self-start rounded-lg px-2 py-0.5 font-display text-[15px] font-extrabold ${FACT_STYLES[i]}`}>
-                  {f.value}
-                </span>
-                <span className="mt-1.5 text-[13.5px] font-bold leading-snug text-ink">{f.label}</span>
+                {f.value ? (
+                  <>
+                    <span className={`self-start rounded-lg px-2 py-0.5 font-display text-[15px] font-extrabold ${FACT_STYLES[i]}`}>
+                      {f.value}
+                    </span>
+                    <span className="mt-1.5 text-[13.5px] font-bold leading-snug text-ink">{f.label}</span>
+                  </>
+                ) : (
+                  <span className={`rounded-xl px-2 py-1.5 font-display text-[12.5px] font-extrabold leading-snug min-[400px]:px-2.5 min-[400px]:text-[13.5px] sm:px-1.5 sm:text-[12px] xl:px-2 xl:text-[12.5px] ${FACT_STYLES[i]}`}>
+                    {f.label}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

@@ -1,60 +1,85 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { createContext, createElement, useCallback, useContext, useEffect, useState } from "react";
 import { kk } from "./kk";
 import { ru, type Dict } from "./ru";
+import { DEFAULT_LANG, LANG_COOKIE, LANG_COOKIE_MAX_AGE, type Lang } from "./config";
 
-export type Lang = "ru" | "kk";
+export type { Lang };
 
 const STORAGE_KEY = "alenushka-lang";
-const EVENT = "alenushka-lang-change";
 export const dictionaries: Record<Lang, Dict> = { ru, kk };
 
-let memoryLang: Lang | null = null;
+type Ctx = { lang: Lang; setLang: (lang: Lang) => void };
+const LangContext = createContext<Ctx>({ lang: DEFAULT_LANG, setLang: () => {} });
 
-function snapshot(): Lang {
-  if (memoryLang) return memoryLang;
+function persist(lang: Lang) {
+  document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=${LANG_COOKIE_MAX_AGE}; samesite=lax`;
   try {
-    return window.localStorage.getItem(STORAGE_KEY) === "ru" ? "ru" : "kk";
+    window.localStorage.setItem(STORAGE_KEY, lang);
   } catch {
-    return "kk";
+    /* приватный режим — язык всё равно хранится в cookie */
   }
 }
 
-function subscribe(cb: () => void) {
-  window.addEventListener(EVENT, cb);
-  window.addEventListener("storage", cb);
-  return () => {
-    window.removeEventListener(EVENT, cb);
-    window.removeEventListener("storage", cb);
-  };
+function hasLangCookie() {
+  return document.cookie.split("; ").some((c) => c.startsWith(`${LANG_COOKIE}=`));
 }
 
-/** Текущий язык (по умолчанию казахский). Выбор сохраняется в localStorage и переключается без перезагрузки. */
-export function useLang(): [Lang, (lang: Lang) => void] {
-  const lang = useSyncExternalStore(subscribe, snapshot, () => "kk" as Lang);
+/**
+ * Язык приходит с сервера (cookie), поэтому серверный HTML и первая отрисовка на клиенте совпадают:
+ * нет мигания языка и ошибок гидратации. По умолчанию — русский.
+ */
+export function LangProvider({ initial, children }: { initial: Lang; children: React.ReactNode }) {
+  const [lang, setLangState] = useState<Lang>(initial);
+
   const setLang = useCallback((next: Lang) => {
-    memoryLang = next;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* приватный режим — язык держится до перезагрузки */
-    }
-    window.dispatchEvent(new Event(EVENT));
+    setLangState(next);
+    persist(next);
   }, []);
+
+  useEffect(() => {
+    // Посетители, выбравшие язык до перехода на cookie, — переносим выбор из localStorage.
+    if (hasLangCookie()) return;
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage.getItem(STORAGE_KEY);
+    } catch {}
+    if (stored === "kk" || stored === "ru") {
+      persist(stored);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- одноразовая миграция сохранённого выбора
+      if (stored !== initial) setLangState(stored);
+    }
+  }, [initial]);
+
+  useEffect(() => {
+    // Синхронизация между вкладками.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && (e.newValue === "ru" || e.newValue === "kk")) setLangState(e.newValue);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  return createElement(LangContext.Provider, { value: { lang, setLang } }, children);
+}
+
+export function useLang(): [Lang, (lang: Lang) => void] {
+  const { lang, setLang } = useContext(LangContext);
   return [lang, setLang];
 }
 
 export function useT(): Dict {
-  const [lang] = useLang();
-  return dictionaries[lang];
+  return dictionaries[useLang()[0]];
 }
 
 /** Синхронизирует <html lang>, заголовок вкладки и description с выбранным языком. */
 export function useDocumentLang() {
   const [lang] = useLang();
   useEffect(() => {
-    document.documentElement.lang = lang;
+    const html = document.documentElement;
+    html.lang = lang;
+    html.setAttribute("translate", "no");
     const { title, description } = dictionaries[lang].meta;
     const apply = () => {
       if (document.title !== title) document.title = title;

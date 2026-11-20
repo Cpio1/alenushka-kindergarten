@@ -94,22 +94,30 @@ export function Groups() {
       <div className="container-x">
         <SectionHeading id="groups-title" eyebrow={g.eyebrow} title={g.title} lead={g.lead} tone="lavender" />
 
-        <ul className="mx-auto grid max-w-[1040px] grid-cols-1 gap-4 min-[480px]:grid-cols-2 md:grid-cols-6 lg:max-w-none lg:grid-cols-5 lg:gap-3 xl:gap-4">
+        <ul className="mx-auto grid max-w-[1040px] grid-cols-1 gap-3 min-[480px]:grid-cols-2 sm:gap-4 md:grid-cols-6 lg:max-w-none lg:grid-cols-5 lg:gap-3 xl:gap-4">
           {GROUPS.map(({ key, name, Art, blob, shape, age, ring, place }, i) => {
             const item = g.items[key];
             return (
               <li
                 key={key}
-                className={`reveal group flex items-center gap-4 rounded-[26px] bg-white p-4 shadow-soft ring-2 ring-transparent transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lift min-[480px]:flex-col min-[480px]:p-5 min-[480px]:text-center lg:px-3 lg:py-5 xl:px-4 ${ring} ${place}`}
+                className={`reveal group flex min-w-0 items-center gap-3.5 rounded-[24px] bg-white p-3.5 shadow-soft ring-2 ring-transparent transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lift min-[480px]:flex-col min-[480px]:gap-3 min-[480px]:p-4 min-[480px]:text-center lg:px-2.5 lg:py-4 xl:px-3.5 ${ring} ${place}`}
                 style={{ "--d": `${i * 70}ms` } as React.CSSProperties}
               >
-                <div className={`relative grid size-24 shrink-0 place-items-center sm:size-28 ${blob} ${shape}`}>
+                <div className={`relative grid size-20 shrink-0 place-items-center sm:size-24 ${blob} ${shape}`}>
                   <Art className="size-[82%] transition-transform duration-500 group-hover:-rotate-3 group-hover:scale-[1.04]" />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-display text-[clamp(1.2rem,1.1rem+0.4vw,1.4rem)] font-extrabold leading-tight text-ink">{name}</h3>
-                  <p className="mt-1 text-[14.5px] font-semibold text-ink-soft">{item.type}</p>
-                  <span className={`mt-2.5 inline-flex rounded-full px-3 py-1 text-[13.5px] font-extrabold ${age}`}>{item.age}</span>
+                <div className="min-w-0 flex-1 min-[480px]:flex min-[480px]:w-full min-[480px]:flex-col min-[480px]:items-center">
+                  <h3 className="font-display text-[clamp(1.15rem,1.05rem+0.35vw,1.35rem)] font-extrabold leading-tight text-ink [overflow-wrap:anywhere]">{name}</h3>
+                  <p className="mt-0.5 text-[14px] font-semibold leading-snug text-ink-soft [overflow-wrap:anywhere] lg:text-[13.5px] xl:text-[14px]">{item.type}</p>
+                  <span className={`mt-2 inline-flex max-w-full flex-wrap items-center justify-center gap-x-1.5 rounded-full px-2.5 py-1 text-[13px] font-bold leading-tight ${age}`}>
+                    {!item.age.startsWith(item.badge) && (
+                      <>
+                        <span className="font-display font-extrabold">{item.badge}</span>
+                        <span aria-hidden className="opacity-50">·</span>
+                      </>
+                    )}
+                    <span>{item.age}</span>
+                  </span>
                 </div>
               </li>
             );
