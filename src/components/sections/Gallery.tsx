@@ -12,7 +12,11 @@ import { Butterfly, Cloud, Flower } from "../decor/Doodles";
 import { InstagramIcon } from "../ui/BrandIcons";
 import { SectionHeading } from "../ui/SectionHeading";
 
-const STEP = 8;
+/** Сколько рядов показывать за раз: на десктопе — 2, на планшете — 3. */
+const LG = "(min-width: 1024px)";
+const rowsPerPage = () => (window.matchMedia(LG).matches ? 2 : 3);
+/** До измерения (SSR и первый кадр) — примерное число фото. */
+const FALLBACK = 8;
 const noop = () => () => {};
 /** true только на клиенте после гидрации — для портала. */
 const useMounted = () => useSyncExternalStore(noop, () => true, () => false);
@@ -21,7 +25,49 @@ export function Gallery() {
   const t = useT();
   const g = t.gallery;
   const photos = galleryPhotos;
-  const [shown, setShown] = useState(STEP);
+  const [pages, setPages] = useState(1);
+  const grid = useRef<HTMLUListElement>(null);
+  const probe = useRef<HTMLDivElement>(null);
+  const [perPage, setPerPage] = useState<number[] | null>(null);
+  // Число фото в каждой «странице» из целых рядов: повторяем правило переноса flex-wrap,
+  // чтобы видимые ряды всегда были заполнены, а не обрывались на середине.
+  useEffect(() => {
+    const ul = grid.current;
+    const pr = probe.current;
+    if (!ul || !pr) return;
+    const measure = () => {
+      const width = ul.clientWidth;
+      const rowH = pr.offsetHeight;
+      if (!width || !rowH) return;
+      const gap = parseFloat(getComputedStyle(ul).columnGap) || 0;
+      const lines: number[] = [];
+      let used = -gap;
+      let count = 0;
+      for (const p of photos) {
+        const basis = (p.width / p.height) * rowH;
+        if (count > 0 && used + gap + basis > width + 0.5) {
+          lines.push(count);
+          used = -gap;
+          count = 0;
+        }
+        used += gap + basis;
+        count++;
+      }
+      if (count) lines.push(count);
+      const per = rowsPerPage();
+      const cuts: number[] = [];
+      for (let i = per; i < lines.length; i += per) cuts.push(lines.slice(0, i).reduce((a, b) => a + b, 0));
+      setPerPage(cuts);
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(ul);
+    ro.observe(pr);
+    return () => ro.disconnect();
+  }, [photos]);
+  // cuts — границы страниц по рядам; после последней границы показываются все фото
+  const cuts = perPage ?? (photos.length > FALLBACK ? [FALLBACK] : []);
+  const shown = pages - 1 < cuts.length ? cuts[pages - 1] : photos.length;
+  const hasMore = cuts.length > 0;
   const [index, setIndex] = useState<number | null>(null);
   const thumbs = useRef<(HTMLButtonElement | null)[]>([]);
   const slides = useRef<(HTMLButtonElement | null)[]>([]);
@@ -100,14 +146,15 @@ export function Gallery() {
             </div>
 
             {/* Планшет и десктоп: ряды одинаковой высоты, ширина каждой плитки — по пропорциям фото (без обрезки) */}
-            <ul className="hidden flex-wrap gap-3 sm:flex lg:gap-4">
+            <div ref={probe} aria-hidden className="invisible absolute h-[var(--row-h)] w-0" />
+            <ul ref={grid} className="hidden flex-wrap gap-3 sm:flex lg:gap-4">
               {visible.map((p, i) => {
                 const ratio = p.width / p.height;
                 return (
                 <li
                   key={p.src}
                   className="reveal"
-                  style={{ "--d": `${(i % STEP) * 50}ms`, flexGrow: ratio, flexBasis: `calc(${ratio} * var(--row-h))` } as React.CSSProperties}
+                  style={{ "--d": `${Math.min(i, 8) * 50}ms`, flexGrow: ratio, flexBasis: `calc(${ratio} * var(--row-h))` } as React.CSSProperties}
                 >
                   <button
                     ref={(el) => {
@@ -134,15 +181,15 @@ export function Gallery() {
                 </li>
                 );
               })}
-              {/* распорка: последний ряд не растягивается на всю ширину */}
-              <li aria-hidden className="h-0" style={{ flexGrow: 10, flexBasis: 0 }} />
+              {/* распорка: последний (неполный) ряд всех фото не растягивается на всю ширину */}
+              {shown >= photos.length && <li aria-hidden className="h-0" style={{ flexGrow: 10, flexBasis: 0 }} />}
             </ul>
 
-            {photos.length > STEP && (
+            {hasMore && (
               <div className="mt-6 hidden justify-center sm:flex">
                 <button
                   type="button"
-                  onClick={() => setShown((s) => (s >= photos.length ? STEP : s + STEP))}
+                  onClick={() => setPages((n) => (shown >= photos.length ? 1 : n + 1))}
                   className="inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-[15.5px] font-extrabold text-mint-deep shadow-soft ring-2 ring-mint transition hover:-translate-y-0.5"
                 >
                   {shown >= photos.length ? (
